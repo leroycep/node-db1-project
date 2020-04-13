@@ -63,6 +63,29 @@ router.delete("/:id", validateAccountId, (req, res) => {
     });
 });
 
+router.put("/:id", validateAccountId, validateAccount, (req, res) => {
+  db("accounts")
+    .where("id", req.params.id)
+    .update(req.body, "id")
+    .then((_num_updated) => {
+      db("accounts")
+        .select()
+        .where({ id: req.params.id })
+        .first()
+        .then((account) => {
+          res.status(200).json(account);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ error: "Could not retrieve updated account" });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: "Could not update account" });
+    });
+});
+
 function validateAccountId(req, res, next) {
   db("accounts")
     .select()
