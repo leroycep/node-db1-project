@@ -1,7 +1,29 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import styled from "styled-components";
 
 const API = "http://localhost:5000/api";
+
+const AppContainer = styled.div`
+  max-width: 1080px;
+  margin: 0 auto;
+`;
+
+const AccountsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  div {
+      max-width: 45%;
+      margin-bottom: 2%;
+  }
+`;
+
+const AccountCard = styled.div`
+  border: 1px solid black;
+  padding: 0 2%;
+`;
 
 function App() {
   const [accounts, setAccounts] = useState([]);
@@ -16,16 +38,17 @@ function App() {
   useEffect(fetchAccounts, []);
 
   return (
-    <div>
+    <AppContainer>
       <h2>Accounts</h2>
-      <ul>
+      <AccountsContainer>
         {accounts.map((account) => (
-          <li key={account.id}>
-            <code>{JSON.stringify(account)}</code>
-          </li>
+          <AccountCard key={account.id}>
+            <h3>{account.name}</h3>
+            <p>${account.budget}</p>
+          </AccountCard>
         ))}
-      </ul>
-    </div>
+      </AccountsContainer>
+    </AppContainer>
   );
 }
 
