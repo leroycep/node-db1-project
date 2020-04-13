@@ -15,7 +15,7 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/", validateAccount, (req, res) => {
+router.post("/", validateAccountId, validateAccount, (req, res) => {
   db("accounts")
     .insert(req.body)
     .returning("id")
@@ -40,32 +40,17 @@ router.post("/", validateAccount, (req, res) => {
     });
 });
 
-router.get("/:id", (req, res) => {
-  db("accounts")
-    .select()
-    .where({ id: req.params.id })
-    .first()
-    .then((account) => {
-      if (account) {
-        res.status(200).json(account);
-      } else {
-        res
-          .status(404)
-          .json({ error: "Account with the specified id could not be found" });
-      }
-    })
-    .catch(() => {
-      res.status(500).json({ error: "Could not retrieve accounts data" });
-    });
+router.get("/:id", validateAccountId, (req, res) => {
+  res.status(200).json(req.account);
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateAccountId, (req, res) => {
   db.del()
     .where("id", req.params.id)
     .from("accounts")
     .then((num_deleted) => {
       if (num_deleted > 0) {
-        res.status(200).json({ message: "Account deleted" });
+        res.status(200).json(req.account);
       } else {
         res
           .status(404)
@@ -77,6 +62,26 @@ router.delete("/:id", (req, res) => {
       res.status(500).json({ error: "Could not remove account" });
     });
 });
+
+function validateAccountId(req, res, next) {
+  db("accounts")
+    .select()
+    .where({ id: req.params.id })
+    .first()
+    .then((account) => {
+      if (account) {
+        req.account = account;
+        next();
+      } else {
+        res
+          .status(404)
+          .json({ error: "Account with the specified id could not be found" });
+      }
+    })
+    .catch(() => {
+      res.status(500).json({ error: "Could not retrieve accounts data" });
+    });
+}
 
 function validateAccount(req, res, next) {
   if (req.body.name === undefined || req.body.budget === undefined) {
