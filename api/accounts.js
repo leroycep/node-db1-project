@@ -17,18 +17,18 @@ router.get("/", (req, res) => {
     .then((accounts) => {
       res.status(200).json(accounts);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       res.status(500).json({ error: "Could not retrieve accounts data" });
     });
 });
 
-router.post("/", validateAccountId, validateAccount, (req, res) => {
+router.post("/", validateAccount, (req, res) => {
   db("accounts")
     .insert(req.body)
     .returning("id")
     .then((new_ids) => {
       const id = new_ids[0];
-      console.log(`account id: ${id}`);
       db("accounts")
         .select()
         .where({ id })
@@ -108,7 +108,8 @@ function validateAccountId(req, res, next) {
           .json({ error: "Account with the specified id could not be found" });
       }
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       res.status(500).json({ error: "Could not retrieve accounts data" });
     });
 }
